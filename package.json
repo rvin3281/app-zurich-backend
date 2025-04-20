@@ -2,15 +2,26 @@
   "name": "@app-zurich-backend/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:billing:dev": "cross-env NODE_ENV=development nx serve billing-service --watch"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/sequelize": "^11.0.0",
+    "@nestjs/swagger": "^7.3.1",
     "axios": "^1.6.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cross-env": "^7.0.3",
+    "mysql2": "^3.14.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "sequelize": "^6.37.7",
+    "sequelize-typescript": "^2.1.6"
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.0.1",
@@ -27,8 +38,10 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/node": "~18.16.9",
+    "@types/sequelize": "^4.28.20",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
     "eslint": "~8.57.0",
@@ -42,5 +55,6 @@
     "tslib": "^2.3.0",
     "typescript": "~5.7.2",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "nx": {}
 }

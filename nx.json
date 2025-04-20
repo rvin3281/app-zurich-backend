@@ -37,7 +37,10 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/app-zurich-backend-e2e/**/*"]
+      "exclude": [
+        "apps/app-zurich-backend-e2e/**/*",
+        "billing-service-e2e/**/*"
+      ]
     }
   ]
 }
