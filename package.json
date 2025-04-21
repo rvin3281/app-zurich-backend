@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:billing:dev": "cross-env NODE_ENV=development nx serve billing-service --watch"
+    "start:billing:dev": "cross-env NODE_ENV=development nx serve billing-service --watch",
+    "start:billing:build": "cross-env NODE_ENV=development nx build billing-service"
   },
   "private": true,
   "dependencies": {
