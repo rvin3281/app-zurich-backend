@@ -146,8 +146,6 @@ export class BillingService {
         include: ['customer', 'product'],
       });
 
-      console.log('DATA ================', data);
-
       if (!data || data === null) {
         throw new NotFoundException(`Billing record with id ${id} not found`);
       }
