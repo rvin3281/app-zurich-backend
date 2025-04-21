@@ -18,7 +18,6 @@ export class AppConfigService {
       database: this.configService.get<string>('DB_DATABASE'),
       autoLoadModels: true,
       logging: console.log,
-      sync: { force: true },
     };
   }
 
