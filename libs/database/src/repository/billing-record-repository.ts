@@ -20,8 +20,18 @@ export class BillingRecordRepository {
     return await this.billingRecordModel.findOne(options);
   }
 
+  async findById(id: number): Promise<BillingRecordModel | null> {
+    return await this.billingRecordModel.findByPk(id);
+  }
+
   async findAll(options?: FindOptions<BillingRecordModel>): Promise<BillingRecordModel[] | null> {
     return await this.billingRecordModel.findAll(options);
+  }
+
+  async findAndCountAll(
+    options?: FindOptions<BillingRecordModel>,
+  ): Promise<{ rows: BillingRecordModel[]; count: number }> {
+    return await this.billingRecordModel.findAndCountAll(options);
   }
 
   async update(

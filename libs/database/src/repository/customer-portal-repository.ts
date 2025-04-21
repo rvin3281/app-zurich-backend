@@ -30,6 +30,10 @@ export class CustomerPortalRepository {
     return await this.customerBillingPortalModel.findAll(options);
   }
 
+  async findById(id: number): Promise<CustomersBillingPortalModel | null> {
+    return await this.customerBillingPortalModel.findByPk(id);
+  }
+
   async findOne(
     option?: FindOptions<CustomersBillingPortalModel>,
   ): Promise<CustomersBillingPortalModel | null> {

@@ -3,21 +3,35 @@ import {
   AdminLoginDto,
   AdminLogInInterface,
   CreateBillingDto,
+  GetAllBillingDto,
   HttpExceptionFilter,
   Roles,
   SuccessBaseResponse,
   SuccessBaseResponseWithData,
+  SuccessPaginatedBaseResponse,
+  UpdateBillingDto,
   USER_ROLE,
 } from '@app-zurich-backend/shared';
 import {
   Body,
   Controller,
-  InternalServerErrorException,
+  Delete,
+  Get,
   Logger,
+  Param,
+  Patch,
   Post,
+  Query,
   UseFilters,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { BillingService } from './billing.service';
 
 @ApiTags('Billing Service')
@@ -49,19 +63,60 @@ export class BillingController {
   async create(
     @Body() createBillingDto: CreateBillingDto,
   ): Promise<SuccessBaseResponseWithData<BillingRecordModel>> {
-    try {
-      return this.billingService.create(createBillingDto);
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        JSON.stringify({
-          service: BillingService.name,
-          additionalInfo: { createBillingDto },
-        }),
-      );
-      throw new InternalServerErrorException(error.message);
-    }
+    return this.billingService.create(createBillingDto);
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'get all billing records',
+    description: 'Returns paginated billing records',
+  })
+  @ApiResponse({ status: 200, description: 'Billing records fetched successfully' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'size', required: false, type: Number, description: 'Page size' })
+  @ApiQuery({
+    name: 'productCode',
+    required: false,
+    type: String,
+    description: 'Filter by product code',
+  })
+  @ApiQuery({ name: 'location', required: false, type: String, description: 'Filter by location' })
+  async findAll(
+    @Query() query?: GetAllBillingDto,
+  ): Promise<SuccessPaginatedBaseResponse<BillingRecordModel>> {
+    return await this.billingService.findAll(query);
+  }
+
+  @Get('/:id')
+  @ApiOperation({ summary: 'Get Billing Record by ID' })
+  @ApiResponse({ status: 200, description: 'Billing record found', type: BillingRecordModel })
+  @ApiResponse({ status: 404, description: 'Billing record not found' })
+  async findById(
+    @Param('id') id: number,
+  ): Promise<SuccessBaseResponseWithData<BillingRecordModel>> {
+    return await this.billingService.findById(id);
+  }
+
+  @Delete('/:id')
+  @ApiResponse({ status: 200, description: 'Billing record deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Billing record not found' })
+  async deleteById(@Param('id') id: number): Promise<SuccessBaseResponse> {
+    return this.billingService.delete(id);
+  }
+
+  @Patch('/:id')
+  @ApiOperation({ summary: 'Update Billing Record by ID' })
+  @ApiBody({ type: UpdateBillingDto })
+  @ApiResponse({ status: 200, description: 'Billing record updated successfully' })
+  @ApiResponse({
+    status: 404,
+    description: 'Billing record or customer id or prooduct ID not found',
+  })
+  async update(
+    @Param('id') id: number,
+    @Body() updateBillingDto: UpdateBillingDto,
+  ): Promise<SuccessBaseResponse> {
+    return this.billingService.update(id, updateBillingDto);
   }
 
   @Post('login')

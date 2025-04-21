@@ -2,17 +2,22 @@ import {
   BillingRecordModel,
   BillingRecordRepository,
   CustomerPortalRepository,
+  ProductRecordModel,
   ProductRecordRepository,
 } from '@app-zurich-backend/database';
 import {
   AdminLoginDto,
   AdminLogInInterface,
   CreateBillingDto,
+  GetAllBillingDto,
   SampleCustomerData,
   SampleProductData,
   SuccessBaseResponse,
   SuccessBaseResponseWithData,
+  SuccessPaginatedBaseResponse,
   successResponseBuilder,
+  successResponsePaginatedBuilder,
+  UpdateBillingDto,
 } from '@app-zurich-backend/shared';
 import {
   BadRequestException,
@@ -20,8 +25,10 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { FindAndCountOptions, UpdateOptions } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
@@ -80,6 +87,180 @@ export class BillingService {
     }
   }
 
+  async findAll(
+    query?: GetAllBillingDto,
+  ): Promise<SuccessPaginatedBaseResponse<BillingRecordModel>> {
+    try {
+      //Default page 1
+      const page = query?.page && query.page ? query.page : 1;
+      // Default size 5
+      const size = query?.size && query.size ? query.size : 5;
+
+      const offset = Number(page - 1) * Number(size);
+
+      const { productCode, location } = query || {};
+
+      const productWhere: any = {};
+      if (productCode) productWhere.productCode = productCode;
+      if (location) productWhere.location = location;
+
+      const options: FindAndCountOptions = {
+        raw: true,
+        offset,
+        limit: Number(size),
+        include: [
+          {
+            model: ProductRecordModel,
+            required: true,
+            where: Object.keys(productWhere).length > 0 ? productWhere : undefined,
+          },
+          'customer',
+        ],
+      };
+
+      const data = await this.billingRecordRepository.findAndCountAll(options);
+
+      return successResponsePaginatedBuilder<BillingRecordModel>(
+        'billing data fetched successfully',
+        data.count,
+        Math.ceil(data.count / Number(size)),
+        Number(page),
+        data.rows,
+      );
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  async findById(id: number): Promise<SuccessBaseResponseWithData<BillingRecordModel>> {
+    try {
+      const data = await this.billingRecordRepository.findOne({
+        where: { id },
+        include: ['customer', 'product'],
+      });
+
+      console.log('DATA ================', data);
+
+      if (!data || data === null) {
+        throw new NotFoundException(`Billing record with id ${id} not found`);
+      }
+
+      return successResponseBuilder<BillingRecordModel>(`Product with ${id} found`, data);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  async update(id: number, requestBillingData: UpdateBillingDto): Promise<SuccessBaseResponse> {
+    try {
+      const data = await this.billingRecordRepository.findById(id);
+
+      if (!data || data === null) {
+        throw new NotFoundException(`Billing record with id ${id} not found`);
+      }
+
+      if (requestBillingData.customerId) {
+        const customer = await this.customerPortalRepository.findById(
+          requestBillingData.customerId,
+        );
+        if (!customer)
+          throw new NotFoundException(
+            `Customer with ID ${requestBillingData.customerId} not found`,
+          );
+      }
+
+      if (requestBillingData.productId) {
+        const product = await this.productRecordRepository.findById(requestBillingData.productId);
+        if (!product)
+          throw new NotFoundException(`Product with ID ${requestBillingData.productId} not found`);
+      }
+
+      const updatedData: Partial<BillingRecordModel> = {};
+      if (requestBillingData.customerId) updatedData.customerId = requestBillingData.customerId;
+      if (requestBillingData.productId) updatedData.productId = requestBillingData.productId;
+      if (requestBillingData.premiumPaid) updatedData.premiumPaid = requestBillingData.premiumPaid;
+
+      const [affectedCount] = await this.billingRecordRepository.update(updatedData, {
+        where: { id },
+      });
+
+      if (affectedCount === 0) {
+        throw new InternalServerErrorException('Failed to update billing record');
+      }
+
+      return successResponseBuilder<BillingRecordModel>(
+        `Billing record with ID ${id} updated successfully`,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  async delete(id: number): Promise<SuccessBaseResponse> {
+    try {
+      const data = await this.billingRecordRepository.findById(id);
+
+      if (!data || data === null) {
+        throw new NotFoundException(`Billing record with id ${id} not found`);
+      }
+
+      const option: UpdateOptions<BillingRecordModel> = {
+        where: {
+          id,
+        },
+      };
+
+      const updatedData = {
+        deletedAt: new Date(),
+        deletedByUserId: 1, // Sample user id
+      };
+
+      const [affectedCount] = await this.billingRecordRepository.update(updatedData, option);
+
+      if (affectedCount === 0) {
+        throw new BadRequestException(`Billing record with ID ${id} unable to delete`);
+      }
+
+      return successResponseBuilder<BillingRecordModel>(
+        `Billing record with ID ${id} updated successfully`,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  // istanbul ignore next
   async adminLoginTest(adminLoginDto: AdminLoginDto): Promise<AdminLogInInterface> {
     const { email, password } = adminLoginDto;
 
@@ -88,11 +269,12 @@ export class BillingService {
     }
 
     return {
-      email: adminLoginDto.email,
+      email,
       roles: 'admin',
     };
   }
 
+  // istanbul ignore next
   async createCustomerAndProduct(): Promise<SuccessBaseResponse> {
     const transaction = await this.sequelize.transaction();
     try {

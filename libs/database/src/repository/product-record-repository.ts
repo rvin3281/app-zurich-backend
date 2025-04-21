@@ -22,6 +22,10 @@ export class ProductRecordRepository {
     return await this.productRecordModel.findAll(options);
   }
 
+  async findById(id: number): Promise<ProductRecordModel | null> {
+    return await this.productRecordModel.findByPk(id);
+  }
+
   async findOne(option?: FindOptions<ProductRecordModel>): Promise<ProductRecordModel | null> {
     return await this.productRecordModel.findOne(option);
   }
