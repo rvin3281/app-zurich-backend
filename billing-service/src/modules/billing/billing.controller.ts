@@ -3,8 +3,10 @@ import {
   AdminLoginDto,
   AdminLogInInterface,
   CreateBillingDto,
+  customerNameInterface,
   GetAllBillingDto,
   HttpExceptionFilter,
+  productCodeInterface,
   Roles,
   SuccessBaseResponse,
   SuccessBaseResponseWithData,
@@ -87,17 +89,8 @@ export class BillingController {
     return await this.billingService.findAll(query);
   }
 
-  @Get('/:id')
-  @ApiOperation({ summary: 'Get Billing Record by ID' })
-  @ApiResponse({ status: 200, description: 'Billing record found', type: BillingRecordModel })
-  @ApiResponse({ status: 404, description: 'Billing record not found' })
-  async findById(
-    @Param('id') id: number,
-  ): Promise<SuccessBaseResponseWithData<BillingRecordModel>> {
-    return await this.billingService.findById(id);
-  }
-
   @Delete('/:id')
+  @Roles(USER_ROLE.ADMIN)
   @ApiResponse({ status: 200, description: 'Billing record deleted successfully' })
   @ApiResponse({ status: 404, description: 'Billing record not found' })
   async deleteById(@Param('id') id: number): Promise<SuccessBaseResponse> {
@@ -131,12 +124,40 @@ export class BillingController {
     return await this.billingService.adminLoginTest(adminLoginDto);
   }
 
-  @Post('/create-customer-and-product-data')
+  @Post('create-customer-and-product-data')
   @ApiOperation({
     summary: 'Create sample data',
     description: 'Creates sample customer and product records to test billing creation.',
   })
   async createCustomerAndProduct(): Promise<SuccessBaseResponse> {
     return await this.billingService.createCustomerAndProduct();
+  }
+
+  @Get('get-customers')
+  @ApiOperation({
+    summary: 'Get customer names',
+    description: 'fetch a list of available customer names and IDs for billing selection.',
+  })
+  async getCustomerNames(): Promise<SuccessBaseResponseWithData<customerNameInterface[]>> {
+    return await this.billingService.getCustomerNames();
+  }
+
+  @Get('get-products')
+  @ApiOperation({
+    summary: 'Get product names',
+    description: 'fetch a list of available product codes and details for billing selection.',
+  })
+  async getProductNames(): Promise<SuccessBaseResponseWithData<productCodeInterface[]>> {
+    return await this.billingService.getProductNames();
+  }
+
+  @Get('/:id')
+  @ApiOperation({ summary: 'Get Billing Record by ID' })
+  @ApiResponse({ status: 200, description: 'Billing record found', type: BillingRecordModel })
+  @ApiResponse({ status: 404, description: 'Billing record not found' })
+  async findById(
+    @Param('id') id: number,
+  ): Promise<SuccessBaseResponseWithData<BillingRecordModel>> {
+    return await this.billingService.findById(id);
   }
 }

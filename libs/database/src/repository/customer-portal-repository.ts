@@ -30,6 +30,12 @@ export class CustomerPortalRepository {
     return await this.customerBillingPortalModel.findAll(options);
   }
 
+  async findAndCountAll(
+    options?: FindOptions<CustomersBillingPortalModel>,
+  ): Promise<{ rows: CustomersBillingPortalModel[]; count: number }> {
+    return await this.customerBillingPortalModel.findAndCountAll(options);
+  }
+
   async findById(id: number): Promise<CustomersBillingPortalModel | null> {
     return await this.customerBillingPortalModel.findByPk(id);
   }

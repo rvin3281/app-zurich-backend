@@ -9,7 +9,9 @@ import {
   AdminLoginDto,
   AdminLogInInterface,
   CreateBillingDto,
+  customerNameInterface,
   GetAllBillingDto,
+  productCodeInterface,
   SampleCustomerData,
   SampleProductData,
   SuccessBaseResponse,
@@ -28,7 +30,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { FindAndCountOptions, UpdateOptions } from 'sequelize';
+import { FindAndCountOptions, FindOptions, UpdateOptions } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
@@ -267,8 +269,10 @@ export class BillingService {
     }
 
     return {
+      id: 1,
+      name: 'admin',
       email,
-      roles: 'admin',
+      role: 'admin',
     };
   }
 
@@ -298,6 +302,69 @@ export class BillingService {
       };
     } catch (error) {
       await transaction.rollback();
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  async getCustomerNames(): Promise<SuccessBaseResponseWithData<customerNameInterface[]>> {
+    try {
+      const options: FindOptions = {
+        where: {},
+        attributes: ['id', 'firstName', 'lastName'],
+        raw: true,
+      };
+      const customerData = await this.customerPortalRepository.findAll(options);
+
+      if (!customerData || customerData.length === 0) {
+        throw new NotFoundException('No customer data');
+      }
+
+      const newData = customerData.map(customer => ({
+        id: Number(customer.id),
+        name: `${customer.firstName} ${customer.lastName}`,
+      }));
+
+      return successResponseBuilder('customer name retrieved successfully', newData);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(
+        error.message,
+        error.stack,
+        JSON.stringify({
+          service: BillingService.name,
+        }),
+      );
+      throw new InternalServerErrorException('An unexpected error occurs');
+    }
+  }
+
+  async getProductNames(): Promise<SuccessBaseResponseWithData<productCodeInterface[]>> {
+    try {
+      const options: FindOptions = {
+        where: {},
+        attributes: ['id', 'productCode', 'location'],
+        raw: true,
+      };
+      const productData = await this.productRecordRepository.findAll(options);
+      if (!productData || productData.length === 0) {
+        throw new NotFoundException('No customer data');
+      }
+
+      const newData = productData.map(product => ({
+        id: Number(product.id),
+        product: `${product.productCode}-${product.location}`,
+      }));
+
+      return successResponseBuilder('customer name retrieved successfully', newData);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         error.message,
         error.stack,

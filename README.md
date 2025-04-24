@@ -1,101 +1,65 @@
-# AppZurichBackend
+# NX NestJS Backend Assessment
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+This project demonstrates a backend API built using **NX Monorepo** with
+**NestJS** for a technical assessment. The purpose of this backend is to provide
+a modular, scalable API for managing billing records, with role-based access
+control (RBAC) and custom authentication. NX helps in managing multiple services
+efficiently within a single monorepo structure.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Tech Stack
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **NestJS** – Backend framework for building efficient, scalable Node.js
+  server-side applications.
+- **NX Monorepo** – Advanced set of extensible dev tools for monorepos, enabling
+  faster builds and integrated testing.
+- **Sequelize & Sequelize-Typescript** – ORM for database interaction (MySQL).
+- **MySQL2** – MySQL client for Node.js.
+- **Axios** – Promise-based HTTP client for making requests.
+- **class-validator / class-transformer** – For DTO validation and
+  transformation.
+- **Swagger** – API documentation.
+- **cross-env** – Manage environment variables across platforms.
 
-## Run tasks
+---
 
-To run the dev server for your app, use:
+## API Structure
 
-```sh
-npx nx serve app-zurich-backend
-```
+All routes are versioned under `/api/v1/billing` with the following available
+endpoints:
 
-To create a production bundle:
+- **POST `/api/v1/billing/`** – Create a billing record (Admin only).
+- **GET `/api/v1/billing/`** – Retrieve all billing records (Supports
+  pagination).
+- **GET `/api/v1/billing/:id`** – Get billing record by ID.
+- **PATCH `/api/v1/billing/:id`** – Update billing record by ID.
+- **DELETE `/api/v1/billing/:id`** – Delete billing record by ID (Admin only).
+- **POST `/api/v1/billing/login`** – Admin login endpoint (custom, non-OAuth
+  based).
+- **POST `/api/v1/billing/create-customer-and-product-data`** – Seed sample
+  customer and product data.
+- **GET `/api/v1/billing/get-customers`** – Get list of customer names and IDs.
+- **GET `/api/v1/billing/get-products`** – Get list of product codes and
+  details.
 
-```sh
-npx nx build app-zurich-backend
-```
+API uses **role-based access control (RBAC)**, where certain routes are
+restricted to admin users.
 
-To see all available targets to run for a project, run:
+---
 
-```sh
-npx nx show project app-zurich-backend
-```
+## Setup Instructions
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Prerequisites
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Node.js** v20.17.0
+- **MySQL Database**
 
-## Add new projects
+### Environment Variables
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+Create a `.env.development` file in the root with the following variables
+(sample structure):
 
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/nest:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/node:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+1. **Clone the repository**: ===> git clone <repository-url>
+2. npm install
+3. Create a .env.development file.
+4. Fill in your database credentials and app config as shown above. 5.**Run
+   Development Server**: npm run start:billing:dev

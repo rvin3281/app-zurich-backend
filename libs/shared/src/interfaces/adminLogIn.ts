@@ -1,4 +1,6 @@
 export interface AdminLogInInterface {
+  id: number;
+  name: string;
   email: string;
-  roles: string;
+  role: string;
 }
