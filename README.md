@@ -55,6 +55,10 @@ restricted to admin users.
 
 ### Environment Variables
 
+DB_DIALECT='mysql' DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=local_db DB_USERNAME=
+DB_PASSWORD= DB_DATABASE=zurich_sit APP_NAME=MyZurichApp APP_DESC=Zurich
+Assessment APP_VERSION=v1 PORT=4000
+
 Create a `.env.development` file in the root with the following variables
 (sample structure):
 
